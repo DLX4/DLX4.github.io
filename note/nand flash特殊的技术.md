@@ -1,4 +1,4 @@
-# Nand Flash特殊的技术
+# Nand Flash技术浅析
 
 > Nand Flash被我们广泛使用，如SSD，SD卡，智能手机的外部存储等。
 >
@@ -6,25 +6,45 @@
 
 聪明的你们是不是对这些技术点了如指掌呢？
 
-## Nand Flash硬件技术点
+## Nand Flash基础
 
 ### Nand结构
 
 Nand Flash ⇒ Chip ⇒ Plane ⇒ Block ⇒ Page ⇒ oob
 
+### Nand读
+
+NandFlash的读取分为**页读**和**随机读**。页读每次读取一个page，从page的第一个数据开始读。其实也就是列号（偏移地址）为0，只提供页地址。
+
+随机读能读取到一个page里面的某个存储单元，但是需要提供行地址和列地址。
+
+页读和随机读的区别只是在于是否提供列号（偏移地址）。
+
+### Nand 写（页编程）
+
+Nand flash的写操作叫做编程Program，编程，一般情况下，是以页为单位的。
+
+### Nand擦除
+
+NandFlash的写操作之前需要先对NandFlash进行擦除工作。
+
 ### 页寄存器（页缓存）（Page Register）
 
 对于Nand的每一片（Plane），都有一个对应的区域专门用于存放，将要写入到物理存储单元中去的或者刚从存储单元中读取出来的，一页的数据，这个数据缓存区，本质上就是一个缓存buffer，但是只是此处datasheet里面把其叫做页寄存器page register而已，实际将其理解为页缓存，更贴切原意。
 
-### 不能随机访问
+### Nand读过程举例
 
-在一个块内，对每一个页进行编程的话，必须是顺序的，而不能是随机的。比如，一个块中有128个页，那么你只能先对page0编程，再对page1编程，。。。。，而不能随机的，比如先对page3，再page1，page2，page0，page4，。。。
+1. 选中Nand芯片
+2. 清除R/B#（ready）
+3. 发送命令0x00，让硬件先准备一下，接下来的操作是读
+4. 发送两个周期的列地址。也就是页内地址，表示，我要从一个页的什么位置开始读取数据。
+5. 接下来再传入三个行地址。对应的也就是页号。
+6. 然后再发一个读操作的第二个周期的命令0x30。接下来，就是硬件内部自己的事情了。
+7. Nand Flash内部硬件逻辑，负责去按照你的要求，根据传入的地址，找到哪个块中的哪个页，然后把整个这一页的数据，都一点点搬运到**页缓存**中去。而在此期间，你所能做的事，也就只需要去读取状态寄存器，看看对应的位的值，也就是R/B#那一位，是1还是0，0的话，就表示，系统是busy，仍在”忙“（着读取数据），如果是1，就说系统活干完了，忙清了，已经把整个页的数据都搬运到页缓存里去了，你可以接下来读取你要的数据了。
+8. 读取数据
+9. 取消选中nandflash芯片
 
-> 关于此处对于只能顺序给页编程的说法，只是翻译自datasheet，但是实际情况却发现是，程序中没有按照此逻辑处理，可以任意对某Block内的Page去做Program的动作，而不必是顺序的。但是datasheet为何如此解释，原因未知，有待知情者给解释一下。
-
-
-
-## Nand Flash文件系统技术点
+## Nand Flash高级技术
 
 在嵌入式系统开发中，经常使用Nand Flash的裸片，通过MTD子系统，文件系统（JFFS2，UBIFS）对Flash进行使用。
 
@@ -114,9 +134,7 @@ UBIFS是一个异步文件系统，和其他文件系统一样，UBIFS也利用�
 
 思考题5：Linux下通过同步的方式打开文件（O_SYNC ），能保证一致性吗？
 
-
-
-## SSD固件技术点
+## 扩展：SSD技术点
 
 SSD主控和固件完成了GC，Trim，磨损均衡（一个SSD上有多个Nand颗粒的话也要均衡起来），断电保护等功能。
 
@@ -143,3 +161,5 @@ https://www.ibm.com/developerworks/cn/linux/l-jffs2/
 https://www.cnblogs.com/Christal-R/p/7230304.html
 
 https://blog.csdn.net/lights_joy/article/details/51649765
+
+https://www.crifan.com/files/doc/docbook/linux_nand_driver/release/html/linux_nand_driver.html
