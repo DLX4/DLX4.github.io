@@ -19,11 +19,14 @@ layout: default
               <h2>
               {{ post.title }}
               </h2>
+			  <!--
               <span class="">{{ post.date | date: "%b %-d, %Y" }}</span>
+			  -->
             </a>
           {% endfor %}
         </div>
-        <!-- <div class="posts-in-categories"> -->
+        <!-- 
+		<div class="posts-in-categories"> 
         {% for category in site.categories %}
           <div post-cate="{{category | first}}">
             {% for posts in category  %}
@@ -40,12 +43,12 @@ layout: default
             {% endfor %}
           </div>
         {% endfor %}
-        
+        -->
         <!-- </div> -->
       </div>
     </div>
   </div>
-  <!--
+
   <div class="col-sm-3">
     <div class="shadow-corner-curl hidden-xs">
       <div class="categories-list-header">
@@ -62,5 +65,5 @@ layout: default
       {% endfor %}
     </div>
   </div>
-  -->
+
 </div>
