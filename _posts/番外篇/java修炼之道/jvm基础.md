@@ -1,12 +1,12 @@
 ---
 layout: post
-title:  "JVM基础-内存管理"
+title:  "JVM内存管理"
 date:   2018-09-08 15:14:54
 categories: java修炼之道
 
 ---
 
-# JVM基础-内存管理
+# JVM内存管理
 
 ## 运行时数据区域
 
