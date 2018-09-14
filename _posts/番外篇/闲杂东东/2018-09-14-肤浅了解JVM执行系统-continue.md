@@ -103,11 +103,27 @@ JVM具有语言无关性，换句话说，Java只是一张皮，Java语言中的
 
 CommonClassLoader、CatalinaClassLoader、SharedClassLoader和WebappClassLoader则是Tomcat自己定义的类加载器，它们分别加载`/common/*`、`/server/*`、`/shared/*`（在tomcat 6之后已经合并到根目录下的lib目录下）和`/WebApp/WEB-INF/*`中的Java类库。其中WebApp类加载器和Jsp类加载器通常会存在多个实例，**每一个Web应用程序**对应一个WebApp类加载器，每一个JSP文件对应一个Jsp类加载器。
 
-tomcat 为了实现隔离性，没有遵守这个约定，每个webappClassLoader加载自己的目录下的class文件，不会传递给父类加载器。（**TODO：翻下源码确认下**）
+Tomcat加载器的实现清晰易懂，并且采用了官方推荐的“正统”的使用类加载器的方式。 
+
+考虑这个场景，如果有10个Web应用程序都是用Spring来进行组织和管理的 话，可以把Spring放到Common或Shared目录下让这些程序共享。Spring要对用户程序的类进 行管理，自然要能访问到用户程序的类，而用户的程序显然是放在/WebApp/WEB-INF目录中 的，那么被CommonClassLoader或SharedClassLoader加载的Spring如何访问并不在其加载范围 内的用户程序呢？
+
+> 7.4.3　破坏双亲委派模型
+>
+> 如果基础类又要调用回用户的代码，那该怎么办？ 
+>
+> 为了解决这个问题，Java设计团队只好引入了一个不太优雅的设计：线程上下文类加载 器（Thread Context ClassLoader）。父类加载器请求子类加载器去完成类加载的动 作，这种行为实际上就是打通了双亲委派模型的层次结构来逆向使用类加载器，实际上已经 违背了双亲委派模型的一般性原则，但这也是无可奈何的事情。Java中所有涉及SPI的加载动 作基本上都采用这种方式，例如JNDI、JDBC、JCE、JAXB和JBI等。 
+>
+>
 
 ## 虚拟机字节码执行引擎 
 
+虚拟机和物理机都有代码执行能力。
 
+不同的虚拟机执行方式可能不一样：
+
+- 解释执行（通过解释器执行）
+- 编译执行（通过即时编译器产生本地代码 执行）
+- 也可能两者兼备
 
 
 
@@ -115,4 +131,3 @@ tomcat 为了实现隔离性，没有遵守这个约定，每个webappClassLoade
 
 《深入理解Java虚拟机》
 
-https://blog.csdn.net/qq_38182963/article/details/78660779
