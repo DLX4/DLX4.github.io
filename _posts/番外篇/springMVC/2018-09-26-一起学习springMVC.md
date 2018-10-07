@@ -218,7 +218,15 @@ REST（表述性状态转移，Representational State Transfer）是一种架构
 
 
 
+调试 RESTful API ：浏览器，Postman ，RESTClient ，httpie ，
 
+自定义 JSON 输出 ：@JsonIgnore 注解
+
+状态码与异常处理 ： controller返回带有状态码的 ResponseEntity ；使用异常来处理状态码 @ExceptionHandler(EntityNotFoundException.class) 
+
+通过 Swagger 实现文档化 
+
+生成 XML 
 
 
 
