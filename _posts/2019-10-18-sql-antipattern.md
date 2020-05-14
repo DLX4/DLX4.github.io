@@ -9,6 +9,12 @@ tags:
   - 反模式
 ---
 
+《sql反模式》读书笔记。
+
+
+
+
+
 反模式：害怕使用null
 
 建议做法：将null视为特殊值。老的SQL标准定义了一个IS NULL的断言，在一个给定的操作值为NULL时，它将返回TRUE。与之对应的，IS NOT NULL在操作值是NULL时，返回FALSE。
