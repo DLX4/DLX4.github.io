@@ -58,11 +58,13 @@ tags:
 
 建议做法：合理归档数据，将历史数据从日常使用的数据中移除。使用水平分区。
 
+```sql
 CREATE TABLE Bugs (  
 bug_id SERIAL PRIMARY KEY,  
 date_reported DATE  
 ) PARTITION BY HASH ( YEAR(date_reported) )  
 PARTITIONS 4;  
+```
 
 
 使用垂直分区， 垂直分区就是根据列来对表进行拆分。当某些列非常庞大或者很少使用的时候，对表进行按列拆分会比较有优势。

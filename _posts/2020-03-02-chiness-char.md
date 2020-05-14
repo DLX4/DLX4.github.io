@@ -3,83 +3,89 @@ title: C语言和JAVA是怎么保存中文字符的
 url: 431.html
 id: 431
 categories:
-  - 未分类
+  - 编程
 date: 2020-03-02 22:12:13
 tags:
+  - 中文字符
 ---
 
 给定下面几个题目，聪明的你们能否很快答得上来呢？ 1、C语言能够保存中文字符吗？是怎么保存的呢？ 2、java能够保存中文字符吗？是怎么保存的呢？ 对于程序员来说最囧的事情莫过于此，每天都在使用字符串，但是却成了最熟悉的陌生人。我们都知道前半问是肯定的，在写好hello world之后加中文肯定木有问题。 赶紧跑个hello world压压惊：
 
-    #include <stdio.h>
-    #include <string.h>
-    
-    int main(void) { 
-        char str1[] = "👦👩";
-        printf("[1]%s\n", str1);
-        printf("[1]%d\n", sizeof(str1));
-        printf("[1]%d\n", strlen(str1));
-    
-        char str2[] = "hello";
-        printf("[2]%s\n", str2);
-        printf("[2]%d\n", sizeof(str2));
-        printf("[2]%d\n", strlen(str2));
-    
-        char str3[] = "𡃁妹";
-        printf("[3]%s\n", str3);
-        printf("[3]%d\n", sizeof(str3));
-        printf("[3]%d\n", strlen(str3));
-    
-        char str4[] = "中国";
-        printf("[4]%s\n", str4);
-        printf("[4]%d\n", sizeof(str4));
-        printf("[4]%d\n", strlen(str4));
-    
-        return 0;
-    }
-    
+```java
+#include <stdio.h>
+#include <string.h>
+
+int main(void) { 
+    char str1[] = "👦👩";
+    printf("[1]%s\n", str1);
+    printf("[1]%d\n", sizeof(str1));
+    printf("[1]%d\n", strlen(str1));
+
+    char str2[] = "hello";
+    printf("[2]%s\n", str2);
+    printf("[2]%d\n", sizeof(str2));
+    printf("[2]%d\n", strlen(str2));
+
+    char str3[] = "𡃁妹";
+    printf("[3]%s\n", str3);
+    printf("[3]%d\n", sizeof(str3));
+    printf("[3]%d\n", strlen(str3));
+
+    char str4[] = "中国";
+    printf("[4]%s\n", str4);
+    printf("[4]%d\n", sizeof(str4));
+    printf("[4]%d\n", strlen(str4));
+
+    return 0;
+}
+```
+
 
 以上程序将输出： \[1\]👦👩 \[1\]9 \[1\]8 \[2\]hello \[2\]6 \[2\]5 \[3\]𡃁妹 \[3\]8 \[3\]7 \[4\]中国 \[4\]7 \[4\]6
 
-    public static void main(String[] args) {
-    //        String s = "helloworld中国";
-    //        System.out.println(s.charAt(10));
-    
-            // 中文常见字
-            String s = "你好";
-            System.out.println("1. string length =" + s.length());
-            System.out.println("1. string bytes length =" + s.getBytes().length);
-            System.out.println("1. string char length =" + s.toCharArray().length);
-            System.out.println(s.charAt(0));
-            System.out.println(s.codePointAt(0));
-            System.out.println(s.codePointAt(1));
-            System.out.println(s.codePointCount(0, s.length()));
-            System.out.println();
-            // emojis
-            s = "👦👩";
-            System.out.println("2. string length =" + s.length());
-            System.out.println("2. string bytes length =" + s.getBytes().length);
-            System.out.println("2. string char length =" + s.toCharArray().length);
-            System.out.println(s.charAt(0));
-            System.out.println(s.codePointAt(0));
-            System.out.println(s.codePointAt(1));
-            System.out.println(s.codePointAt(2));
-            System.out.println(s.codePointAt(3));
-            System.out.println(s.codePointCount(0, s.length()));
-            System.out.println();
-            // 中文生僻字
-            s = "𡃁妹";
-            System.out.println("3. string length =" + s.length());
-            System.out.println("3. string bytes length =" + s.getBytes().length);
-            System.out.println("3. string char length =" + s.toCharArray().length);
-            System.out.println(s.charAt(0));
-            System.out.println(s.codePointAt(0));
-            System.out.println(s.codePointAt(1));
-            System.out.println(s.codePointCount(0, s.length()));
-            System.out.println();
-        }
-    
+```java
+public static void main(String[] args) {
+//        String s = "helloworld中国";
+//        System.out.println(s.charAt(10));
 
-以上代码将输出： 1\. string length =2 1. string bytes length =6 1. string char length =2 你 20320 22909 2
+        // 中文常见字
+        String s = "你好";
+        System.out.println("1. string length =" + s.length());
+        System.out.println("1. string bytes length =" + s.getBytes().length);
+        System.out.println("1. string char length =" + s.toCharArray().length);
+        System.out.println(s.charAt(0));
+        System.out.println(s.codePointAt(0));
+        System.out.println(s.codePointAt(1));
+        System.out.println(s.codePointCount(0, s.length()));
+        System.out.println();
+        // emojis
+        s = "👦👩";
+        System.out.println("2. string length =" + s.length());
+        System.out.println("2. string bytes length =" + s.getBytes().length);
+        System.out.println("2. string char length =" + s.toCharArray().length);
+        System.out.println(s.charAt(0));
+        System.out.println(s.codePointAt(0));
+        System.out.println(s.codePointAt(1));
+        System.out.println(s.codePointAt(2));
+        System.out.println(s.codePointAt(3));
+        System.out.println(s.codePointCount(0, s.length()));
+        System.out.println();
+        // 中文生僻字
+        s = "𡃁妹";
+        System.out.println("3. string length =" + s.length());
+        System.out.println("3. string bytes length =" + s.getBytes().length);
+        System.out.println("3. string char length =" + s.toCharArray().length);
+        System.out.println(s.charAt(0));
+        System.out.println(s.codePointAt(0));
+        System.out.println(s.codePointAt(1));
+        System.out.println(s.codePointCount(0, s.length()));
+        System.out.println();
+    }
+```
+
+以上代码将输出： 
+
+   1\. string length =2 1. string bytes length =6 1. string char length =2 你 20320 22909 2
 
 2.  string length =4
 3.  string bytes length =8

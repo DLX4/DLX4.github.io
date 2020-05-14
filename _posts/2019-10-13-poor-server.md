@@ -25,14 +25,17 @@ date: 2019-10-13 16:50:03
 
 安装好rest插件之后前端可以用rest接口访问wordpress的业务数据。安装插件之后还需要配置nginx服务器，要执行阅读rest插件的[开发文档](https://developer.wordpress.org/rest-api/)。
 
+```nginx
 location /wordpress/ {  
 try_files $uri $uri/ /wordpress/index.php?$args;  
 }
+```
 
 正确配置好rest插件后，[测试](http://domain/wp-json)下rest接口是否能返回json数据。
 
 第二个要注意的地方，在服务器上编译运行主题项目时，由于腾讯云服务器乞丐版配置过低，会报错（错误码137 内存不足），这时候需要给服务器配置swap（实际测试至少要再配置300M，稳妥一点可以配置1G）。主题运行起来以后，发现从外网不能访问3000端口，因为主题监听的是localhost:3000端口，因此需要在nginx配置代理。
 
+```nginx
 server {  
 listen 80;  
 root /usr/share/nginx/html;  
@@ -45,5 +48,6 @@ proxy_pass http://127.0.0.1:3000;
 location /wordpress/ {  
 try_files $uri $uri/ /wordpress/index.php?$args;  
 }
+```
 
 这样就大功告成了。最后可以在腾讯云上买一个域名，需要申请备案。

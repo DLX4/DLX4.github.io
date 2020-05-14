@@ -6,7 +6,7 @@ tags:
 url: 272.html
 id: 272
 categories:
-  - 未分类
+  - web
 date: 2019-11-08 14:44:49
 ---
 
@@ -22,32 +22,34 @@ date: 2019-11-08 14:44:49
 
 **主页面（index.html）：**
 
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-    ...
-    <script type="text/javascript">
-    var app = angular.module('xx-app',[])
-    app.config(function($routeProvider) {
-      $routeProvider
-        .when('/xx/xx', {
-          templateUrl : 'xx.html',
-          controller : 'xxController'
-        })
-    </script>
-    </head>
-    
-    <div class="header">...</div>
-    <div class="content">
-    导航菜单
-    <div class="side-box pull-left" id="sideBar"> 
-    ...
-    <a href="#/xx/xx">功能1</a></li>
-    ...
-    </div> 
-    功能主页
-    <div ng-view ></div>
-    </div> 
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+...
+<script type="text/javascript">
+var app = angular.module('xx-app',[])
+app.config(function($routeProvider) {
+  $routeProvider
+    .when('/xx/xx', {
+      templateUrl : 'xx.html',
+      controller : 'xxController'
+    })
+</script>
+</head>
+
+<div class="header">...</div>
+<div class="content">
+导航菜单
+<div class="side-box pull-left" id="sideBar"> 
+...
+<a href="#/xx/xx">功能1</a></li>
+...
+</div> 
+功能主页
+<div ng-view ></div>
+</div> 
+```
 
 **功能1页面（xx.html）**
 
@@ -61,26 +63,32 @@ date: 2019-11-08 14:44:49
 
 **index.html**
 
-    <div ng-include="'header.html'">...</div>
-    导航菜单
-    <div ng-include="'menu.html'">...</div> 
-    功能主页
-    <div ng-include="'main.html'"></div>
-    </div> 
+```html
+<div ng-include="'header.html'">...</div>
+导航菜单
+<div ng-include="'menu.html'">...</div> 
+功能主页
+<div ng-include="'main.html'"></div>
+</div> 
+```
 
 **main.html**
 
-    <div ng-controller="menu">
-       <div ng-include="menu.cur.url"></div>
-    </div>
+```html
+<div ng-controller="menu">
+   <div ng-include="menu.cur.url"></div>
+</div>
+```
 
 **menu.js**
 
-    app.controller('menu', [
-      '$scope', 'menuProvider',
-      function ($scope,  menuProvider) {
-        $scope.menu =  menuProvider ;
-      }
-    ]);
-    
-    app.provider('menua', function () {});
+```js
+app.controller('menu', [
+  '$scope', 'menuProvider',
+  function ($scope,  menuProvider) {
+    $scope.menu =  menuProvider ;
+  }
+]);
+
+app.provider('menua', function () {});
+```

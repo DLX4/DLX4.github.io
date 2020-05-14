@@ -1,7 +1,7 @@
 ---
 title: 数据库表被误删了怎么办
 tags:
-  - 数据库
+  - flashback
 url: 226.html
 id: 226
 categories:
@@ -10,6 +10,10 @@ date: 2019-10-31 13:24:57
 ---
 
 单表被误删，oracle有个flashback特性可以帮助恢复被删除的表。
+
+
+
+
 
 --1 模拟  删除一张测试表  
 drop table TYPICAL_copy;
