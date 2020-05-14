@@ -4,8 +4,10 @@ url: 101.html
 id: 101
 categories:
   - 数据库
+  - 读书笔记
 date: 2019-10-16 00:25:41
 tags:
+  - sql反模式
 ---
 
 反模式：程序员通常使用逗号分隔的列表来避免在多对多的关系中创建交叉表，我将这种设计方式定义为一种反模式，称为乱穿马路（Jaywalking），因为乱穿马路也是避免过十字路口的一种方式。
@@ -61,7 +63,7 @@ bug_id SERIAL PRIMARY KEY,
 date_reported DATE  
 ) PARTITION BY HASH ( YEAR(date_reported) )  
 PARTITIONS 4;  
-  
+
 
 使用垂直分区， 垂直分区就是根据列来对表进行拆分。当某些列非常庞大或者很少使用的时候，对表进行按列拆分会比较有优势。
 

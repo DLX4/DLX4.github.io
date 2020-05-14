@@ -11,6 +11,10 @@ date: 2019-10-13 16:50:03
 
 网站搭建方案：基于腾讯乞丐版云服务器 \+ wordpress + vue酷炫主题。
 
+
+
+
+
 第一步：购买一台腾讯云服务器，配置（1核1GB），centos操作系统。拿到服务器之后，按照腾讯云的教程[手动搭建wordpress个人站点](https://cloud.tencent.com/document/product/213/8044)，整个过程没有什么坑，最后我们能访问刚刚搭建的wordpress（默认主题），可以点点点，创建文章，评论等。
 
 第二步：给wordpress换一个酷炫的主题。我挑选了一款用vue写的主题，按照主题[作者提供的教程](https://www.xuanmo.xin/details/2987)配置一下。

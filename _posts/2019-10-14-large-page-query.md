@@ -6,6 +6,7 @@ categories:
   - 数据库
 date: 2019-10-14 14:45:38
 tags:
+  - 分页
 ---
 
 经常用到分页查询，一直有个问题悬而未解，不论是mysql（limit 子句）分页查询还是oracle（select A.*, ROWNUM rn from (" + sql + ") A where ROWNUM <=:endNum) where rn >=:startNum"）分页查询都会存在 随着页号变大，查询耗时显著变大的情况。
