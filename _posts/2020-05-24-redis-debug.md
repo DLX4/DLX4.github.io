@@ -10,7 +10,7 @@ date: 2020-05-24 23:39:03
 
 # 在线debug/分析redis 1.0 源码
 
-- [ ] 1、从redis-benchmark出发剖析redis性能为何如此强悍
+- [ ] 
 - [x] 2、rdb文件格式，了解持久化原理
 - [ ] 3、从redis的104个testcase开始按照dfs顺序走读代码
 - [x] 4、redis的事件循环，了解redis-cli和redis-server的通信
@@ -67,8 +67,6 @@ key2 key3 key4 key1
 
 上面中括号括起来的字段标记了数据类型。1.0版本只有string，list，set三种数据类型。上面还标记了两处大括号括起来的标记，用来标记是SELECTDB的东西还是EXPIRETIME相关的东西，以及EOF。
 
-
-
 具体怎么解析的，大家看代码就了然了 `static int rdbLoad(char *filename)`
 
 ```c
@@ -86,7 +84,7 @@ key2 key3 key4 key1
 
 
 
-至于save的时候做了啥，注意这里的rename操作。也就是先写到一个临时的rdb文件然后rename过去。![1590419337048](D:\code\DLX4.github.io\images\1590419337048.png)
+至于save的时候做了啥，注意这里的`rename`操作。也就是先写到一个临时的rdb文件然后rename过去。![1590419337048](D:\code\DLX4.github.io\images\1590419337048.png)
 
 
 
@@ -110,7 +108,27 @@ typedef struct aeEventLoop {
 
 
 
-可以在对应的事件handler中加断点，观察事件时怎么被处理的。
+文件事件本质上是文件的读写事件，是通过select系统调用获取的。
+
+```c
+#include <sys/select.h>
+
+int select(int nfds, fd_set *readfds, fd_set *writefds,
+                  fd_set *exceptfds, struct timeval *timeout);
+
+select() allows a program to monitor multiple file descriptors,
+       waiting until one or more of the file descriptors become "ready" for
+       some class of I/O operation (e.g., input possible).  A file
+       descriptor is considered ready if it is possible to perform a
+       corresponding I/O operation (e.g., read(2), or a sufficiently small
+       write(2)) without blocking.
+```
+
+![1590513741792](D:\code\DLX4.github.io\images\1590513741792.png)
+
+
+
+事件都有对应的事件处理函数，可以在对应的事件handler中加断点，观察事件时怎么被处理的。
 
 情况1：读请求内容（read）
 
@@ -162,3 +180,66 @@ accept事件是redis server初始化的时候加入到事件列表中的，fd为
 ### 时间事件（time event）
 
 可以搜索相关代码 `aeCreateTimeEvent(server.el, 1000, serverCron, NULL, NULL);`  主要是redis sever的定时任务。
+
+## benchmark
+
+redis benchmark的代码也是基于上面的事件循环写的。先构造若干个client，同时加入到event loop列表，循环N次之后通过stop标记停止event loop。（注意：benchmark的时候因为是模拟压测，因此没有删除事件的操作）。
+
+redis本身叫做远程字典服务（远程+字典）目前看来redis使用事件循环来实现了所谓的远程，即多客户端并发连接操作。
+
+显然，单线程的event loop再牛皮也只能把一个cpu核跑满，虽然现在吞吐可以跑到300000 requests per second。
+
+**所以redis显然不是从极致性能出发去设计的。**
+
+```
+====== SET ======
+  10004 requests completed in 0.03 seconds
+  50 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+83.90% <= 0 milliseconds
+100.00% <= 1 milliseconds
+303151.53 requests per second
+
+====== GET ======
+  10013 requests completed in 0.04 seconds
+  50 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+80.81% <= 0 milliseconds
+100.00% <= 1 milliseconds
+250325.00 requests per second
+
+====== INCR ======
+  10004 requests completed in 0.04 seconds
+  50 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+81.07% <= 0 milliseconds
+100.00% <= 1 milliseconds
+263263.16 requests per second
+
+====== LPUSH ======
+  10006 requests completed in 0.04 seconds
+  50 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+82.06% <= 0 milliseconds
+100.00% <= 1 milliseconds
+277944.47 requests per second
+
+====== LPOP ======
+  10005 requests completed in 0.04 seconds
+  50 parallel clients
+  3 bytes payload
+  keep alive: 1
+
+82.12% <= 0 milliseconds
+100.00% <= 1 milliseconds
+277916.69 requests per second
+```
+
