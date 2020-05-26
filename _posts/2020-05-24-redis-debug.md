@@ -11,9 +11,9 @@ date: 2020-05-24 23:39:03
 # 在线debug/分析redis 1.0 源码
 
 - [ ] 1、从redis-benchmark出发剖析redis性能为何如此强悍
-- [ ] 2、rdb文件格式，持久化原理
+- [x] 2、rdb文件格式，了解持久化原理
 - [ ] 3、从redis的104个testcase开始按照dfs顺序走读代码
-- [ ] 4、redis-cli和redis-server的通信
+- [x] 4、redis的事件循环，了解redis-cli和redis-server的通信
 - [ ] 5、基于redis的山寨版推特实现
 
 
@@ -90,3 +90,75 @@ key2 key3 key4 key1
 
 
 
+## redis的事件循环
+
+redis里面的事件分为两类：文件事件和时间事件。
+
+```c
+/* State of an event based program */
+typedef struct aeEventLoop {
+    long long timeEventNextId;
+    aeFileEvent *fileEventHead;
+    aeTimeEvent *timeEventHead;
+    int stop;
+} aeEventLoop;
+```
+
+### 文件事件（file event）
+
+这里的文件就是1 + N个fd。即1个redis server的fd（会触发accept事件），以及N个redis client连接的fd（会触发read和reply事件）。
+
+
+
+可以在对应的事件handler中加断点，观察事件时怎么被处理的。
+
+情况1：读请求内容（read）
+
+![1590426188384](D:\code\DLX4.github.io\images\1590426188384.png)
+
+
+
+情况2：接受请求（accept）
+
+![1590426265615](D:\code\DLX4.github.io\images\1590426265615.png)
+
+情况3：回复（reply）
+
+![1590426333167](C:\Users\ADMINI~1\AppData\Local\Temp\1590426333167.png)
+
+
+
+Accept处理过程中会衍生出Read事件（因为**接受了客户端请求，紧接着就是读取客户端请求内容**），如下图所示，注意下图中的handler为`readQueryFromClient`。
+
+![1590427918273](D:\code\DLX4.github.io\images\1590427918273.png)
+
+Read事件的处理过程中又会衍生出Reply事件（因为**读取请求了，紧接着就是执行请求内容，紧接着考虑是否要回复结果**）。
+
+我们随便选择一个命令（比如dbsize），从调用栈能够清晰看出执行的流程。
+
+![1590503934322](D:\code\DLX4.github.io\images\1590503934322.png)
+
+可以看出`sendReplyToClient`将会在另外单独的一个Event中进行处理。事实上也确实如此：
+
+![1590426916735](D:\code\DLX4.github.io\images\1590426916735.png)
+
+从调用栈可以发现有个叫`redisClient`的数据结构，在`processEvents`之后的重重调用中都充当着入参的角色，这个玩意应该就是服务端给每个client存的会话数据了。
+
+`aeEventLoop`这个数据结构就是事件列表了，某一时刻redis的所有事件（accept，read，reply，time）都挂在这里面。
+
+这4种事件又分为两类：
+
+- file event（数据结构为`aeFileEvent`）：包括accept，read，reply
+- time event（数据结构为`aeTimeEvent`）：只有time
+
+显然read，reply这些事件是关联到某个client的（因此`aeFileEvent.clientData`指向某个redisClient）。并且read，reply事件在handler处理结束之后就会从事件列表中删除（通过指定redisClient的fd从列表中删除相同fd的事件）。
+
+accept事件是redis server初始化的时候加入到事件列表中的，fd为server的fd（`server.fd = anetTcpServer(server.neterr, server.port, server.bindaddr);`），因此accept事件将会一直存在与列表中，从始至终。
+
+![1590427569512](D:\code\DLX4.github.io\images\1590427569512.png)
+
+
+
+### 时间事件（time event）
+
+可以搜索相关代码 `aeCreateTimeEvent(server.el, 1000, serverCron, NULL, NULL);`  主要是redis sever的定时任务。
