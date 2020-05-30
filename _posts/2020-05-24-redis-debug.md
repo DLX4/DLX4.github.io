@@ -10,13 +10,12 @@ date: 2020-05-24 23:39:03
 
 # 在线debug/分析redis 1.0 源码
 
-- [ ] 
+- [x] 1、benchmark分析redis对于性能很佛系，基于单核的event loop。
 - [x] 2、rdb文件格式，了解持久化原理
 - [ ] 3、从redis的104个testcase开始按照dfs顺序走读代码
 - [x] 4、redis的事件循环，了解redis-cli和redis-server的通信
-- [ ] 5、基于redis的山寨版推特实现
-
-
+- [ ] 5、彩蛋，基于redis的山寨版推特实现
+- [ ] 6、master slave的实现原理
 
 ## RDB文件格式
 
@@ -82,9 +81,7 @@ key2 key3 key4 key1
 #define REDIS_EOF 255
 ```
 
-
-
-至于save的时候做了啥，注意这里的`rename`操作。也就是先写到一个临时的rdb文件然后rename过去。![1590419337048](D:\code\DLX4.github.io\images\1590419337048.png)
+至于save的时候做了啥，注意这里的`rename`操作。也就是先写到一个临时的rdb文件然后rename过去。![1590419337048](https://github.com/DLX4/DLX4.github.io/blob/master/images/1590419337048.png)
 
 
 
@@ -124,7 +121,7 @@ select() allows a program to monitor multiple file descriptors,
        write(2)) without blocking.
 ```
 
-![1590513741792](D:\code\DLX4.github.io\images\1590513741792.png)
+![1590513741792](https://github.com/DLX4/DLX4.github.io/blob/master/images/1590513741792.png)
 
 
 
@@ -132,13 +129,13 @@ select() allows a program to monitor multiple file descriptors,
 
 情况1：读请求内容（read）
 
-![1590426188384](D:\code\DLX4.github.io\images\1590426188384.png)
+![1590426188384](https://github.com/DLX4/DLX4.github.io/blob/master/images/1590426188384.png)
 
 
 
 情况2：接受请求（accept）
 
-![1590426265615](D:\code\DLX4.github.io\images\1590426265615.png)
+![1590426265615](https://github.com/DLX4/DLX4.github.io/blob/master/images/1590426265615.png)
 
 情况3：回复（reply）
 
@@ -148,17 +145,17 @@ select() allows a program to monitor multiple file descriptors,
 
 Accept处理过程中会衍生出Read事件（因为**接受了客户端请求，紧接着就是读取客户端请求内容**），如下图所示，注意下图中的handler为`readQueryFromClient`。
 
-![1590427918273](D:\code\DLX4.github.io\images\1590427918273.png)
+![1590427918273](https://github.com/DLX4/DLX4.github.io/blob/master/images/1590427918273.png)
 
 Read事件的处理过程中又会衍生出Reply事件（因为**读取请求了，紧接着就是执行请求内容，紧接着考虑是否要回复结果**）。
 
 我们随便选择一个命令（比如dbsize），从调用栈能够清晰看出执行的流程。
 
-![1590503934322](D:\code\DLX4.github.io\images\1590503934322.png)
+![1590503934322](https://github.com/DLX4/DLX4.github.io/blob/master/images/1590503934322.png)
 
 可以看出`sendReplyToClient`将会在另外单独的一个Event中进行处理。事实上也确实如此：
 
-![1590426916735](D:\code\DLX4.github.io\images\1590426916735.png)
+![1590426916735](https://github.com/DLX4/DLX4.github.io/blob/master/images/1590426916735.png)
 
 从调用栈可以发现有个叫`redisClient`的数据结构，在`processEvents`之后的重重调用中都充当着入参的角色，这个玩意应该就是服务端给每个client存的会话数据了。
 
@@ -173,7 +170,7 @@ Read事件的处理过程中又会衍生出Reply事件（因为**读取请求了
 
 accept事件是redis server初始化的时候加入到事件列表中的，fd为server的fd（`server.fd = anetTcpServer(server.neterr, server.port, server.bindaddr);`），因此accept事件将会一直存在与列表中，从始至终。
 
-![1590427569512](D:\code\DLX4.github.io\images\1590427569512.png)
+![1590427569512](https://github.com/DLX4/DLX4.github.io/blob/master/images/1590427569512.png)
 
 
 
@@ -242,4 +239,8 @@ redis本身叫做远程字典服务（远程+字典）目前看来redis使用事
 100.00% <= 1 milliseconds
 277916.69 requests per second
 ```
+
+## testcase
+
+
 
